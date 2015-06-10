@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-parser.jar"/>
+	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-postagger.jar"/>
+	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-tregex-3.5.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/transition-1.30.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
