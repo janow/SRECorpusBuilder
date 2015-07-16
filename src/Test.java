@@ -120,7 +120,6 @@ public class Test {
 						bw.write("</div>\n");
 						cc++;
 					}
-					if (cc > 2) break;
 				}
 				rows = r.readNext();
 				line = rows[6];
@@ -138,7 +137,7 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 
-		parseFile("phrases_20150716.txt","parse_results.html");
+		parseFile("phrases_20150716.csv","parse_results.html");
 		//parseFile("phrases_cities_20150708.txt","parse_results.html");
 	}
 
