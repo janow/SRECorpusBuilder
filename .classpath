@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-parser.jar"/>
-	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-tregex-3.5.2.jar"/>
-	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/transition-1.30.jar"/>
-	<classpathentry kind="lib" path="/Users/jow/nosync/docs/code/eclipse_workspace/ParseIt/lib/stanford-postagger-3.5.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/vaccine-project-GeoText"/>
 	<classpathentry kind="lib" path="lib/opencsv-1.8.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-parser.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-postagger-3.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-tregex-3.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/transition-1.30.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
