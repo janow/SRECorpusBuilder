@@ -1,9 +1,11 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -31,11 +33,11 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-
+import au.com.bytecode.opencsv.CSVReader;
 
 public class Test {
 
-	public static void parseFile(String filename) throws FileNotFoundException, IOException {
+	public static void parseFile(String filename, String outfile) throws FileNotFoundException, IOException {
 		Config config = new Config();
 		
 		LexicalizedParser lp = LexicalizedParser.loadModel("englishPCFG.ser.gz");
@@ -45,10 +47,15 @@ public class Test {
 		
 		
 		try {
-			BufferedReader r = new BufferedReader(new FileReader(filename));
+			CSVReader r = new CSVReader (new InputStreamReader(new FileInputStream(filename), "UTF-8"));
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+			bw.write("<!DOCTYPE html><html><head></head><body>\n");
+			
 			int cc = 0;
 
-			String line = r.readLine();
+			String[] rows = r.readNext();
+			String line = rows[6];
 			while (line != null) {
 
 				if (!line.replaceFirst("^[\\x00-\\x200\\xA0]+", "").replaceFirst("[\\x00-\\x20\\xA0]+$", "").isEmpty()) {
@@ -60,7 +67,6 @@ public class Test {
 					//Tokenizer<CoreLabel> tok = tokenizerFactory.getTokenizer(new StringReader("Hotel Jardin d'Eiffel is close to Eiffel tower"));
 					//Tokenizer<CoreLabel> tok = tokenizerFactory.getTokenizer(new StringReader("Situated in Paris's Trocadero neighborhood, this hotel is close to Wine Museum, Eiffel Tower, and Arc de Triomphe"));
 
-					
 					List<CoreLabel> rawWords2 = tok.tokenize();
 
 					Tree parse = lp.apply(rawWords2);
@@ -81,31 +87,48 @@ public class Test {
 					TregexPattern p = TregexPattern.compile(s);
 					TregexMatcher m = p.matcher(parse);
 					
+					int start = Integer.parseInt(rows[4]);
+					int end = Integer.parseInt(rows[5]);
+					
+					
 					while (m.find()) {
-						System.out.println("sentence: >"+line+"<");
-						System.out.println("geotxt: ");
-						String geocodeResults = geoTxtApi.geoCodeToGeoJson(line, "stanfordh", false, 0, false, true);
-						System.out.println(geocodeResults);
-						System.out.println("stanford extraction: ");
-						String sr = StanfordHierarchyAnalyzer.st.tagAlltoGeoJson(line, false, 0, false, true);
-						System.out.println(sr);
-						System.out.println("gate extraction: ");
-						sr = GateHierarchyAnalyzer.gate.tagAlltoGeoJson(line, false, 0, false, true);
-						System.out.println(sr);
+						System.out.println("sentence: >"+line+"<");								
+						bw.write("<div><h2>"+line.substring(0,start)+"<u>"+line.substring(start,end)+"</u>"+line.substring(end)+"</h2>\n");
+						
+//						System.out.println("geotxt: ");
+//						String geocodeResults = geoTxtApi.geoCodeToGeoJson(line, "stanfordh", false, 0, false, true);
+//						System.out.println(geocodeResults);
+//						System.out.println("stanford extraction: ");
+//						String sr = StanfordHierarchyAnalyzer.st.tagAlltoGeoJson(line, false, 0, false, true);
+//						System.out.println(sr);
+//						System.out.println("gate extraction: ");
+//						sr = GateHierarchyAnalyzer.gate.tagAlltoGeoJson(line, false, 0, false, true);
+//						System.out.println(sr);
 						Tree t = m.getNode("np1");
 						System.out.println("np1:\n"+Sentence.listToString(t.yield()));
+						bw.write("<p>np1: " + Sentence.listToString(t.yield())+"</p>\n");
+						
 						t = m.getNode("np2");
 						System.out.println("np2:\n"+Sentence.listToString(t.yield()));
-						//System.out.println("match:\n");
+						bw.write("<p>np2: " + Sentence.listToString(t.yield())+"</p>\n");
+						
+						//System.out.println("match:\n")
 						m.getMatch().pennPrint();
 						System.out.println("\n");
+						bw.write("<p><pre>"+m.getMatch().pennString()+"</pre></p>\n");
+						
+						bw.write("</div>\n");
 						cc++;
 					}
+					if (cc > 2) break;
 				}
-				line = r.readLine();
+				rows = r.readNext();
+				line = rows[6];
 			}
 			System.out.println(cc);
 			r.close();
+			bw.write("</body></html>");
+			bw.close();
 
 		} catch (Exception e) {
 			System.out.println("file operation failed, could not read file");
@@ -115,8 +138,8 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 
-		parseFile("phrases_20150625.txt");
-		//parseFile("phrases_cities_20150708.txt");
+		parseFile("phrases_20150716.txt","parse_results.html");
+		//parseFile("phrases_cities_20150708.txt","parse_results.html");
 	}
 
 }
