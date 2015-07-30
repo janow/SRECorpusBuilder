@@ -92,10 +92,10 @@ public class Test {
 					Tree parse = lp.apply(rawWords2);
 
 					// produce & print the parse tree
-					TreePrint tp = new TreePrint("penn,typedDependencies");
-					StringWriter sw = new StringWriter();
-					PrintWriter writer = new PrintWriter(sw);
-					
+//					TreePrint tp = new TreePrint("penn,typedDependencies");
+//					StringWriter sw = new StringWriter();
+//					PrintWriter writer = new PrintWriter(sw);
+//					
 					
 					// System.out.println("sentence: >"+line+"<");
 					// tp.printTree(parse,writer);
