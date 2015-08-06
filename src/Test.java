@@ -38,6 +38,7 @@ import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class Test {
 
@@ -57,6 +58,11 @@ public class Test {
 		JSONParser jsonParser = new JSONParser();
 
 		try {
+
+			//CSVWriter writer = new CSVWriter(new FileWriter("output.csv"), ',');
+			
+			CSVWriter writer = new CSVWriter(new BufferedWriter (new FileWriter("output.csv"), ','));
+
 			CSVReader r = new CSVReader(new InputStreamReader(
 					new FileInputStream(filename), "UTF-8"));
 
@@ -64,13 +70,16 @@ public class Test {
 			bw.write("<!DOCTYPE html><html><head></head><body>\n");
 
 			int cc = 0;
-			
 
 			String[] rows = r.readNext();
+			String[] writingRows = new String[9];
+
+			for (int i = 0; i < rows.length; i++) {
+				writingRows[i] = rows[i];
+			}
+
 			String line = rows[6];
 			while (line != null) {
-				
-				
 
 				if (!line.replaceFirst("^[\\x00-\\x200\\xA0]+", "")
 						.replaceFirst("[\\x00-\\x20\\xA0]+$", "").isEmpty()) {
@@ -92,11 +101,11 @@ public class Test {
 					Tree parse = lp.apply(rawWords2);
 
 					// produce & print the parse tree
-//					TreePrint tp = new TreePrint("penn,typedDependencies");
-//					StringWriter sw = new StringWriter();
-//					PrintWriter writer = new PrintWriter(sw);
-//					
-					
+					// TreePrint tp = new TreePrint("penn,typedDependencies");
+					// StringWriter sw = new StringWriter();
+					// PrintWriter writer = new PrintWriter(sw);
+					//
+
 					// System.out.println("sentence: >"+line+"<");
 					// tp.printTree(parse,writer);
 					// System.out.println("Parse results:\n"+sw.toString());
@@ -141,6 +150,8 @@ public class Test {
 						// Sentence.listToString(t.yield()),
 						// geoTxtApi, jsonParser) + "</p>\n");
 
+						writingRows[7] = Sentence.listToString(t.yield());
+
 						bw.write("<p>toponym: "
 								+ GeoLocation.getGeoInfo(
 										Sentence.listToString(t.yield()),
@@ -151,6 +162,8 @@ public class Test {
 						// + Sentence.listToString(t.yield()));
 						bw.write("<p>np2: " + Sentence.listToString(t.yield())
 								+ "</p>\n");
+
+						writingRows[8] = Sentence.listToString(t.yield());
 						// System.out.println("<p>toponym: "
 						// + GeoLocation.getGeoInfo(
 						// Sentence.listToString(t.yield()),
@@ -168,16 +181,28 @@ public class Test {
 								+ "</pre></p>\n");
 
 						bw.write("</div>\n");
-						
+
 					}
 				}
 				cc++;
-				log.info(Integer.toString(cc) +" processed.");
+				log.info(Integer.toString(cc) + " processed.");
+				
+				writer.writeNext(writingRows);
+
 				rows = r.readNext();
+
+				for (int i = 0; i < rows.length; i++) {
+					writingRows[i] = rows[i];
+				}
+				writingRows[7] = null;
+				writingRows[8] = null;
+
 				line = rows[6];
 			}
 			log.info(Integer.toString(cc));
 			r.close();
+			writer.close();
+
 			bw.write("</body></html>");
 			bw.close();
 
