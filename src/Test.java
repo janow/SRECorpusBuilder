@@ -44,6 +44,70 @@ public class Test {
 
 	public static final Logger log = Logger.getLogger(Test.class.getName());
 
+	public static void produceHTMLfromCSV(String csvFileName, String outFileName) {
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(outFileName));
+			bw.write("<!DOCTYPE html><html><head></head><body>\n");
+
+			CSVReader r = new CSVReader(new InputStreamReader(new FileInputStream(csvFileName), "UTF-8"));
+
+			String[] row = null;
+			int c = 0;
+		
+			while ((row = r.readNext()) != null) {
+				c++;
+				System.out.println(c+": "+row[0]+","+row[1]+","+row[2]+","+row[3]);
+				
+				int start = Integer.parseInt(row[4]);
+				int end = Integer.parseInt(row[5]);
+				String line = row[6];
+
+				bw.write("<div><h2>" + line.substring(0, start) + "<u>"
+						+ line.substring(start, end) + "</u>"
+						+ line.substring(end) + "</h2>\n");
+
+
+				//				bw.write("<p><pre>" + m.getMatch().pennString()
+				//						+ "</pre></p>\n");
+
+
+				if (row.length > 6) {  // geocoding results included?
+					
+
+//					bw.write("<p>np1: " + Sentence.listToString(t.yield())
+//							+ "</p>\n");
+
+//					bw.write("<p>toponym: "
+//							+ GeoLocation.getGeoInfo(
+//									Sentence.listToString(t.yield()),
+//									geoTxtApi, jsonParser) + "</p>\n");
+//
+//					bw.write("<p>np2: " + Sentence.listToString(t.yield())
+//							+ "</p>\n");
+//
+//					bw.write("<p>toponym: "
+//							+ GeoLocation.getGeoInfo(
+//									Sentence.listToString(t.yield()),
+//									geoTxtApi, jsonParser) + "</p>\n");
+
+
+				}
+
+				bw.write("</div>\n");
+
+			}
+			
+			r.close();
+			bw.write("</body></html>");
+			bw.close();
+
+		} catch (Exception e) {
+			log.info("file operation failed, could not read file");
+			e.printStackTrace();
+		}
+
+	}
+
 	public static void parseFile(String filename, String outfile)
 			throws FileNotFoundException, IOException {
 		Config config = new Config();
@@ -60,14 +124,11 @@ public class Test {
 		try {
 
 			//CSVWriter writer = new CSVWriter(new FileWriter("output.csv"), ',');
-			
+
 			CSVWriter writer = new CSVWriter(new BufferedWriter (new FileWriter("output.csv"), ','));
 
 			CSVReader r = new CSVReader(new InputStreamReader(
 					new FileInputStream(filename), "UTF-8"));
-
-			BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-			bw.write("<!DOCTYPE html><html><head></head><body>\n");
 
 			int cc = 0;
 
@@ -117,14 +178,9 @@ public class Test {
 					TregexPattern p = TregexPattern.compile(s);
 					TregexMatcher m = p.matcher(parse);
 
-					int start = Integer.parseInt(rows[4]);
-					int end = Integer.parseInt(rows[5]);
-
 					while (m.find()) {
 						// System.out.println("sentence: >" + line + "<");
-						bw.write("<div><h2>" + line.substring(0, start) + "<u>"
-								+ line.substring(start, end) + "</u>"
-								+ line.substring(end) + "</h2>\n");
+
 
 						// System.out.println("geotxt: ");
 						// String geocodeResults =
@@ -143,8 +199,7 @@ public class Test {
 						Tree t = m.getNode("np1");
 						// System.out.println("np1:\n"
 						// + Sentence.listToString(t.yield()));
-						bw.write("<p>np1: " + Sentence.listToString(t.yield())
-								+ "</p>\n");
+
 						// System.out.println("<p>toponym: "
 						// + GeoLocation.getGeoInfo(
 						// Sentence.listToString(t.yield()),
@@ -152,16 +207,11 @@ public class Test {
 
 						writingRows[7] = Sentence.listToString(t.yield());
 
-						bw.write("<p>toponym: "
-								+ GeoLocation.getGeoInfo(
-										Sentence.listToString(t.yield()),
-										geoTxtApi, jsonParser) + "</p>\n");
 
 						t = m.getNode("np2");
 						// System.out.println("np2:\n"
 						// + Sentence.listToString(t.yield()));
-						bw.write("<p>np2: " + Sentence.listToString(t.yield())
-								+ "</p>\n");
+
 
 						writingRows[8] = Sentence.listToString(t.yield());
 						// System.out.println("<p>toponym: "
@@ -169,24 +219,18 @@ public class Test {
 						// Sentence.listToString(t.yield()),
 						// geoTxtApi, jsonParser) + "</p>\n");
 
-						bw.write("<p>toponym: "
-								+ GeoLocation.getGeoInfo(
-										Sentence.listToString(t.yield()),
-										geoTxtApi, jsonParser) + "</p>\n");
+
 
 						// System.out.println("match:\n")
 						m.getMatch().pennPrint();
 						// System.out.println("\n");
-						bw.write("<p><pre>" + m.getMatch().pennString()
-								+ "</pre></p>\n");
 
-						bw.write("</div>\n");
 
 					}
 				}
 				cc++;
 				log.info(Integer.toString(cc) + " processed.");
-				
+
 				writer.writeNext(writingRows);
 
 				rows = r.readNext();
@@ -203,8 +247,7 @@ public class Test {
 			r.close();
 			writer.close();
 
-			bw.write("</body></html>");
-			bw.close();
+			
 
 		} catch (Exception e) {
 			log.info("file operation failed, could not read file");
@@ -213,8 +256,8 @@ public class Test {
 	}
 
 	public final static void main(String[] args) throws Exception {
-
-		parseFile("phrases_20150716.csv", "parse_results.html");
+		produceHTMLfromCSV("phrases_20150716.csv", "output.html");
+		//parseFile("phrases_20150716.csv", "parse_results.html");
 		// parseFile("phrases_cities_20150708.txt","parse_results.html");
 	}
 

@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/stanford-postagger-3.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/stanford-tregex-3.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/transition-1.30.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
