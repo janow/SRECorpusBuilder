@@ -162,14 +162,11 @@ public class Test {
 					Tree parse = lp.apply(rawWords2);
 
 					// produce & print the parse tree
-					// TreePrint tp = new TreePrint("penn,typedDependencies");
-					// StringWriter sw = new StringWriter();
-					// PrintWriter writer = new PrintWriter(sw);
-					//
-
+					
 					// System.out.println("sentence: >"+line+"<");
-					// tp.printTree(parse,writer);
-					// System.out.println("Parse results:\n"+sw.toString());
+					
+					// get string representation of parse tree and print it
+					//System.out.println("Parse results:\n"+parse.pennString());
 
 					// test tregex by checking for a pattern
 					String s = "S < NP=np1 <+(VP) (ADVP < (RB < close) < (PP < (TO < to) <+(NP) (NP=np2 !< CC)))";
@@ -181,6 +178,8 @@ public class Test {
 					while (m.find()) {
 						// System.out.println("sentence: >" + line + "<");
 
+						// get string representation of matching part of parse tree and print it
+						//System.out.println("Parse results match:\n"+m.getMatch().pennString());		
 
 						// System.out.println("geotxt: ");
 						// String geocodeResults =
@@ -256,8 +255,8 @@ public class Test {
 	}
 
 	public final static void main(String[] args) throws Exception {
-		produceHTMLfromCSV("phrases_20150716.csv", "output.html");
-		//parseFile("phrases_20150716.csv", "parse_results.html");
+		//produceHTMLfromCSV("phrases_20150716.csv", "output.html");
+		parseFile("phrases_20150716.csv", "parse_results.html");
 		// parseFile("phrases_cities_20150708.txt","parse_results.html");
 	}
 
