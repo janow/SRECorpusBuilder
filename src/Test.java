@@ -165,20 +165,22 @@ public class Test {
 					
 					// System.out.println("sentence: >"+line+"<");
 					
-					// get string representation of parse tree and print it
+					// TODO: parse should become a column in output csv
 					//System.out.println("Parse results:\n"+parse.pennString());
 
 					// test tregex by checking for a pattern
 					String s = "S < NP=np1 <+(VP) (ADVP < (RB < close) < (PP < (TO < to) <+(NP) (NP=np2 !< CC)))";
 					// String s = "S < NP=np1 < (VP < (ADJP < (JJ < close)))";
 
+					// TODO: pattern should become a column in the output csv
+					
 					TregexPattern p = TregexPattern.compile(s);
 					TregexMatcher m = p.matcher(parse);
 
 					while (m.find()) {
 						// System.out.println("sentence: >" + line + "<");
 
-						// get string representation of matching part of parse tree and print it
+						// TODO:  matching parse tree should become a column in the output csv
 						//System.out.println("Parse results match:\n"+m.getMatch().pennString());		
 
 						// System.out.println("geotxt: ");
