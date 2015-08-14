@@ -108,7 +108,7 @@ public class Test {
 
 	}
 
-	public static void parseFile(String filename, String outfile)
+	public static void parseFile(String filename, String outputCSVName)
 			throws FileNotFoundException, IOException {
 		Config config = new Config();
 
@@ -125,7 +125,7 @@ public class Test {
 
 			//CSVWriter writer = new CSVWriter(new FileWriter("output.csv"), ',');
 
-			CSVWriter writer = new CSVWriter(new BufferedWriter (new FileWriter("output.csv"), ','));
+			CSVWriter writer = new CSVWriter(new BufferedWriter (new FileWriter(outputCSVName), ','));
 
 			CSVReader r = new CSVReader(new InputStreamReader(
 					new FileInputStream(filename), "UTF-8"));
@@ -256,8 +256,8 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 		//produceHTMLfromCSV("phrases_20150716.csv", "output.html");
-		parseFile("phrases_20150716.csv", "parse_results.html");
-		// parseFile("phrases_cities_20150708.txt","parse_results.html");
+		parseFile("phrases_20150716.csv", "output.csv");
+		// parseFile("phrases_cities_20150708.txt","output.csv");
 	}
 
 }
