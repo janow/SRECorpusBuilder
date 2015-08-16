@@ -22,11 +22,11 @@ public class GeoLocation {
 	 */
 
 	public static String getGeoInfo(String placeName, GeoTxtApi geoTxtApi,
-			JSONParser parser) throws IllegalArgumentException,
-			URISyntaxException, IOException, ParseException {
+			JSONParser parser, boolean formatOutput)
+			throws IllegalArgumentException, URISyntaxException, IOException,
+			ParseException {
 
 		String response = "";
-
 
 		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
 				false, 0, true, true);
@@ -42,7 +42,7 @@ public class GeoLocation {
 		JSONObject properties = (JSONObject) feature.get("properties");
 
 		Long geoNameId = (Long) properties.get("geoNameId");
-		
+
 		String fCode = (String) properties.get("featureCode");
 
 		if (geoNameId == null) {
@@ -51,7 +51,11 @@ public class GeoLocation {
 
 		String toponym = (String) properties.get("toponym");
 
-		response = "<b>Toponym</b>: " + toponym;
+		if (formatOutput) {
+			response = "<b>Toponym</b>: " + toponym;
+		} else {
+			response = toponym;
+		}
 
 		JSONObject hierarchyFc = (JSONObject) properties.get("hierarchy");
 		JSONArray hierarchyArray = (JSONArray) hierarchyFc.get("features");
@@ -71,24 +75,45 @@ public class GeoLocation {
 			hierarchy += hToponym + ", ";
 
 		}
-		
+
 		if (hierarchy.length() > 0) {
 			hierarchy = hierarchy.substring(0, hierarchy.length() - 2);
 		}
 
 		response += ", " + hierarchy;
-		
-		response += " <b> FeatureCode: </b> "+ fCode;
 
-		response += "  <a target=\"_blank\" href=\"http://www.geonames.org/"
-				+ geoNameId.toString()
-				+ "\">See on GeoNames</a> or <a target=\"_blank\" href=\"http://api.geonames.org/get?geonameId="
-				+ geoNameId.toString()
-				+ "&username=demo&style=full\">Check ID " + geoNameId + "</a>";
-		
-		
+		if (formatOutput) {
+
+			response += " <b> FeatureCode: </b> " + fCode;
+
+			response += "  <a target=\"_blank\" href=\"http://www.geonames.org/"
+					+ geoNameId.toString()
+					+ "\">See on GeoNames</a> or <a target=\"_blank\" href=\"http://api.geonames.org/get?geonameId="
+					+ geoNameId.toString()
+					+ "&username=demo&style=full\">Check ID "
+					+ geoNameId
+					+ "</a>";
+		} else {
+			
+			response += " - " + fCode;
+			response += " "+  geoNameId.toString();
+		}
 
 		return response;
+	}
+
+	public static String getCandidates(String placeName,
+			boolean includeAlternates, GeoTxtApi geoTxtApi, JSONParser parser)
+			throws IllegalArgumentException, URISyntaxException, IOException,
+			ParseException {
+
+		String response = "";
+
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
+				includeAlternates, 0, true, true);
+
+		return geoCodedString;
+
 	}
 
 	public static void main(String[] args) throws FileNotFoundException,
@@ -103,7 +128,7 @@ public class GeoLocation {
 		JSONParser jsonParser = new JSONParser();
 
 		System.out.println(GeoLocation.getGeoInfo("London", geoTxtApi,
-				jsonParser));
+				jsonParser, true));
 
 	}
 
