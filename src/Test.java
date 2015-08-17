@@ -230,7 +230,7 @@ public class Test {
 
 						writingRows[14] = GeoLocation.getGeoInfo(
 								Sentence.listToString(t.yield()), geoTxtApi,
-								jsonParser, true);
+								jsonParser, false);
 
 						writingRows[15] = GeoLocation.getCandidates(
 								Sentence.listToString(t.yield()), true,
