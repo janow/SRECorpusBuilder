@@ -47,8 +47,7 @@ public class Test {
 	public static void produceHTMLfromCSV(String csvFileName, String outFileName) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(outFileName));
-			bw.write("<!DOCTYPE html><html><head></head><body>\n");
-
+			bw.write("<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"treeview.css\"></head><body>");
 			CSVReader r = new CSVReader(new InputStreamReader(
 					new FileInputStream(csvFileName), "UTF-8"));
 
@@ -68,26 +67,24 @@ public class Test {
 						+ line.substring(start, end) + "</u>"
 						+ line.substring(end) + "</h2>\n");
 
-				// bw.write("<p><pre>" + m.getMatch().pennString()
-				// + "</pre></p>\n");
+				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-pt-\""+c+"\"/><label for=\"item-pt-\""+c+"\">Matching parse tree</label><ul><p><pre>" + row[9] + "</pre></p></ul></li></ul></div>\n");
 
-				if (row.length > 6) { // geocoding results included?
+				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-ct-\""+c+"\"/><label for=\"item-ct-\""+c+"\">Complete parse tree</label><ul><p><pre>" + row[8] + "</pre></p></ul></li></ul></div>\n");
 
-					// bw.write("<p>np1: " + Sentence.listToString(t.yield())
-					// + "</p>\n");
+				
+				if (row.length > 9) { // geocoding results included?
 
-					// bw.write("<p>toponym: "
-					// + GeoLocation.getGeoInfo(
-					// Sentence.listToString(t.yield()),
-					// geoTxtApi, jsonParser, true) + "</p>\n");
-					//
-					// bw.write("<p>np2: " + Sentence.listToString(t.yield())
-					// + "</p>\n");
-					//
-					// bw.write("<p>toponym: "
-					// + GeoLocation.getGeoInfo(
-					// Sentence.listToString(t.yield()),
-					// geoTxtApi, jsonParser, true) + "</p>\n");
+					bw.write("<p>np1: " + row[10]  + "</p>\n");
+
+					bw.write("<p>toponym: " + row[11] + "</p>\n");
+					
+					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc1-\""+c+"\"/><label for=\"item-gc1-\""+c+"\">GeoJSON np1</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[12] + "</pre></p></ul></li></ul></div>\n");
+					
+					bw.write("<p>np2: " + row[13] + "</p>\n");
+					
+					bw.write("<p>toponym: " + row[14] + "</p>\n");
+					
+					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc2-\""+c+"\"/><label for=\"item-gc2-\""+c+"\">GeoJSON np2</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[15] + "</pre></p></ul></li></ul></div>\n");
 
 				}
 
@@ -287,8 +284,8 @@ public class Test {
 	}
 
 	public final static void main(String[] args) throws Exception {
-		// produceHTMLfromCSV("phrases_20150716.csv", "output.html");
-		parseFile("phrases_20150716.csv", "output.csv");
+		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output.html");
+		//parseFile("phrases_20150716.csv", "output.csv");
 		// parseFile("phrases_cities_20150708.txt","output.csv");
 	}
 
