@@ -256,13 +256,7 @@ public class Test {
 				cc++;
 				log.info(Integer.toString(cc) + " processed.");
 
-				try {
-					rows = r.readNext();
-				} catch (Exception e) {
-					log.info("Could not read line.");
-					r.close();
-					writer.close();
-				}
+				rows = r.readNext();
 				
 				try {
 					int rowLength = rows.length;
