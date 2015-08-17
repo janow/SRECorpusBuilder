@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -44,7 +45,7 @@ public class Test {
 
 	public static final Logger log = Logger.getLogger(Test.class.getName());
 
-	public static void produceHTMLfromCSV(String csvFileName, String outFileName) {
+	public static void produceHTMLfromCSV(String csvFileName, String outFileName, Filter[] filters) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(outFileName));
 			bw.write("<!DOCTYPE html><html><head><link rel=\"stylesheet\" href=\"treeview.css\"></head><body>");
@@ -59,6 +60,17 @@ public class Test {
 				System.out.println(c + ": " + row[0] + "," + row[1] + ","
 						+ row[2] + "," + row[3]);
 
+				// if a filter says row should be filtered out, we move on to the next row
+				boolean skip = false;
+				for (Filter f : filters) { 
+					if (f.doFilter(row)) {
+						skip = true;
+						break;
+					};
+				}
+				if (skip) continue;
+				
+				
 				int start = Integer.parseInt(row[4]);
 				int end = Integer.parseInt(row[5]);
 				String line = row[6];
@@ -102,6 +114,7 @@ public class Test {
 		}
 
 	}
+	
 
 	public static void parseFile(String filename, String outputCSVName)
 			throws FileNotFoundException, IOException {
@@ -284,7 +297,9 @@ public class Test {
 	}
 
 	public final static void main(String[] args) throws Exception {
-		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output.html");
+		String[] keywords = { "the hotel", "we", "he", "she", "they", "you", "our hotel", "this hotel" };
+		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output.html", new Filter[] { new ToponymsFoundFilter(), 
+																						new NPKeywordFilter(keywords)});
 		//parseFile("phrases_20150716.csv", "output.csv");
 		// parseFile("phrases_cities_20150708.txt","output.csv");
 	}
