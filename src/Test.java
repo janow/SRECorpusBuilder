@@ -263,6 +263,14 @@ public class Test {
 					r.close();
 					writer.close();
 				}
+				
+				try {
+					int rowLength = rows.length;
+				} catch (Exception e) {
+					log.info("Could not read line.");
+					r.close();
+					writer.close();
+				}
 
 				for (int i = 0; i < rows.length; i++) {
 					writingRows[i] = rows[i];
