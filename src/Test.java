@@ -102,6 +102,9 @@ public class Test {
 					
 					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc2-\""+c+"\"/><label for=\"item-gc2-\""+c+"\">GeoJSON np2</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[15] + "</pre></p></ul></li></ul></div>\n");
 
+					JSONParser jsonParser = new JSONParser();
+					bw.write("<p>distance: "+Utility.computeDistanceFromJSON(row[12],row[15],jsonParser)+ " km</p>");
+					
 				}
 
 				bw.write("</div>\n");
@@ -302,8 +305,10 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 		String[] keywords = { "the hotel", "we", "he", "she", "they", "you", "our hotel", "this hotel" };
-		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output.html", new Filter[] { new ToponymsFoundFilter(), 
-																						new NPKeywordFilter(keywords)});
+		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output2.html", new Filter[] { new ToponymsFoundFilter(), 
+																						 new NPKeywordFilter(keywords),
+																						 //new DifferentAdmin2Filter(),
+																						 new DistanceFilter(100) });
 		//parseFile("phrases_20150716.csv", "output.csv");
 		// parseFile("phrases_cities_20150708.txt","output.csv");
 	}
