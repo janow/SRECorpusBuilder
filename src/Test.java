@@ -54,7 +54,8 @@ public class Test {
 
 			String[] row = null;
 			int c = 0;
-
+			int instances = 0;
+			
 			while ((row = r.readNext()) != null) {
 				c++;
 				System.out.println(c + ": " + row[0] + "," + row[1] + ","
@@ -70,15 +71,18 @@ public class Test {
 				}
 				if (skip) continue;
 				
+				instances++;
 				
 				int start = Integer.parseInt(row[4]);
 				int end = Integer.parseInt(row[5]);
 				String line = row[6];
 
-				bw.write("<div><h2>" + line.substring(0, start) + "<u>"
+				bw.write("<div><h2>" + instances + " - " + line.substring(0, start) + "<u>"
 						+ line.substring(start, end) + "</u>"
 						+ line.substring(end) + "</h2>\n");
 
+				bw.write("<p>pattern: "+row[7]+"</p>");
+				
 				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-pt-\""+c+"\"/><label for=\"item-pt-\""+c+"\">Matching parse tree</label><ul><p><pre>" + row[9] + "</pre></p></ul></li></ul></div>\n");
 
 				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-ct-\""+c+"\"/><label for=\"item-ct-\""+c+"\">Complete parse tree</label><ul><p><pre>" + row[8] + "</pre></p></ul></li></ul></div>\n");
@@ -86,13 +90,13 @@ public class Test {
 				
 				if (row.length > 9) { // geocoding results included?
 
-					bw.write("<p>np1: " + row[10]  + "</p>\n");
+					bw.write("<p style=\"color: #009900\">np1: " + row[10]  + "</p>\n");
 
 					bw.write("<p>toponym: " + row[11] + "</p>\n");
 					
 					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc1-\""+c+"\"/><label for=\"item-gc1-\""+c+"\">GeoJSON np1</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[12] + "</pre></p></ul></li></ul></div>\n");
 					
-					bw.write("<p>np2: " + row[13] + "</p>\n");
+					bw.write("<p style=\"color: #000099\">np2: " + row[13] + "</p>\n");
 					
 					bw.write("<p>toponym: " + row[14] + "</p>\n");
 					
