@@ -122,6 +122,53 @@ public class Test {
 
 	}
 	
+	public static void addDistanceColumn(String inCSVName, String outCSVName, Filter[] filters) {
+		try {
+
+			CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(outCSVName), ','));
+
+			CSVReader r = new CSVReader(new InputStreamReader(new FileInputStream(inCSVName), "UTF-8"));
+
+			JSONParser jsonParser = new JSONParser();
+			
+			int cc = 0;
+			String[] rows;
+			
+			while ((rows = r.readNext()) != null) {
+				
+				// if a filter says row should be filtered out, we move on to the next row
+				boolean skip = false;
+				for (Filter f : filters) { 
+					if (f.doFilter(rows)) {
+						skip = true;
+						break;
+					};
+				}
+				if (skip) continue;
+				
+				cc++;
+				String[] writingRow = new String[17];
+				for (int i = 0; i < 16; i++) {
+					writingRow[i] = rows[i];
+				}				
+				if (!rows[11].equals("No toponym found") && !rows[14].equals("No toponym found"))
+					writingRow[16] = ""+Utility.computeDistanceFromJSON(rows[12], rows[15], jsonParser);
+				else
+					writingRow[16] = "";
+				
+				writer.writeNext(writingRow);
+				
+				log.info(Integer.toString(cc));
+			}
+			r.close();
+			writer.close();
+
+		} catch (Exception e) {
+			log.info("file operation failed, could not read file");
+			e.printStackTrace();
+		}
+		
+	}
 
 	public static void parseFile(String filename, String outputCSVName)
 			throws FileNotFoundException, IOException {
@@ -305,10 +352,16 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 		String[] keywords = { "the hotel", "we", "he", "she", "they", "you", "our hotel", "this hotel" };
-		produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output2.html", new Filter[] { new ToponymsFoundFilter(), 
+		/*produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output2.html", new Filter[] { new ToponymsFoundFilter(), 
 																						 new NPKeywordFilter(keywords),
 																						 //new DifferentAdmin2Filter(),
 																						 new DistanceFilter(100) });
+		*/
+		
+		addDistanceColumn("phrases_20150716WithNPs.csv","output_with_distance_filtered100km.csv", new Filter[] { new ToponymsFoundFilter(), 
+																						 new NPKeywordFilter(keywords),
+																						 new DistanceFilter(100) } );
+		
 		//parseFile("phrases_20150716.csv", "output.csv");
 		// parseFile("phrases_cities_20150708.txt","output.csv");
 	}
