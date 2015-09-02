@@ -9,12 +9,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import edu.psu.ist.vaccine.analyzers.GateHierarchyAnalyzer;
 import edu.psu.ist.vaccine.analyzers.StanfordHierarchyAnalyzer;
@@ -45,6 +48,8 @@ public class Test {
 
 	public static final Logger log = Logger.getLogger(Test.class.getName());
 
+
+
 	public static void produceHTMLfromCSV(String csvFileName, String outFileName, Filter[] filters) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(outFileName));
@@ -55,7 +60,7 @@ public class Test {
 			String[] row = null;
 			int c = 0;
 			int instances = 0;
-			
+
 			while ((row = r.readNext()) != null) {
 				c++;
 				System.out.println(c + ": " + row[0] + "," + row[1] + ","
@@ -70,9 +75,9 @@ public class Test {
 					};
 				}
 				if (skip) continue;
-				
+
 				instances++;
-				
+
 				int start = Integer.parseInt(row[4]);
 				int end = Integer.parseInt(row[5]);
 				String line = row[6];
@@ -82,29 +87,29 @@ public class Test {
 						+ line.substring(end) + "</h2>\n");
 
 				bw.write("<p>pattern: "+row[7]+"</p>");
-				
+
 				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-pt-\""+c+"\"/><label for=\"item-pt-\""+c+"\">Matching parse tree</label><ul><p><pre>" + row[9] + "</pre></p></ul></li></ul></div>\n");
 
 				bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-ct-\""+c+"\"/><label for=\"item-ct-\""+c+"\">Complete parse tree</label><ul><p><pre>" + row[8] + "</pre></p></ul></li></ul></div>\n");
 
-				
+
 				if (row.length > 9) { // geocoding results included?
 
 					bw.write("<p style=\"color: #009900\">np1: " + row[10]  + "</p>\n");
 
 					bw.write("<p>toponym: " + row[11] + "</p>\n");
-					
+
 					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc1-\""+c+"\"/><label for=\"item-gc1-\""+c+"\">GeoJSON np1</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[12] + "</pre></p></ul></li></ul></div>\n");
-					
+
 					bw.write("<p style=\"color: #000099\">np2: " + row[13] + "</p>\n");
-					
+
 					bw.write("<p>toponym: " + row[14] + "</p>\n");
-					
+
 					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc2-\""+c+"\"/><label for=\"item-gc2-\""+c+"\">GeoJSON np2</label><ul><p><pre style=\"white-space: pre-wrap\">" + row[15] + "</pre></p></ul></li></ul></div>\n");
 
 					JSONParser jsonParser = new JSONParser();
 					bw.write("<p>distance: "+Utility.computeDistanceFromJSON(row[12],row[15],jsonParser)+ " km</p>");
-					
+
 				}
 
 				bw.write("</div>\n");
@@ -121,7 +126,7 @@ public class Test {
 		}
 
 	}
-	
+
 	public static void addDistanceColumn(String inCSVName, String outCSVName, Filter[] filters) {
 		try {
 
@@ -130,12 +135,12 @@ public class Test {
 			CSVReader r = new CSVReader(new InputStreamReader(new FileInputStream(inCSVName), "UTF-8"));
 
 			JSONParser jsonParser = new JSONParser();
-			
+
 			int cc = 0;
 			String[] rows;
-			
+
 			while ((rows = r.readNext()) != null) {
-				
+
 				// if a filter says row should be filtered out, we move on to the next row
 				boolean skip = false;
 				for (Filter f : filters) { 
@@ -145,7 +150,7 @@ public class Test {
 					};
 				}
 				if (skip) continue;
-				
+
 				cc++;
 				String[] writingRow = new String[17];
 				for (int i = 0; i < 16; i++) {
@@ -155,9 +160,9 @@ public class Test {
 					writingRow[16] = ""+Utility.computeDistanceFromJSON(rows[12], rows[15], jsonParser);
 				else
 					writingRow[16] = "";
-				
+
 				writer.writeNext(writingRow);
-				
+
 				log.info(Integer.toString(cc));
 			}
 			r.close();
@@ -167,20 +172,192 @@ public class Test {
 			log.info("file operation failed, could not read file");
 			e.printStackTrace();
 		}
-		
+
 	}
 
-	public static void parseFile(String filename, String outputCSVName)
+	public static void geocodeLine(String line, String[] writingRows,JSONParser jsonParser,GeoTxtApi geoTxtApi) throws IllegalArgumentException, URISyntaxException, IOException, ParseException {
+
+		writingRows[11] = GeoLocation.getGeoInfo(
+				writingRows[10], geoTxtApi,
+				jsonParser, false);
+
+		writingRows[12] = GeoLocation.getCandidates(
+				writingRows[10], true,
+				geoTxtApi, jsonParser);
+
+		writingRows[14] = GeoLocation.getGeoInfo(
+				writingRows[13], geoTxtApi,
+				jsonParser, false);
+
+		writingRows[15] = GeoLocation.getCandidates(
+				writingRows[13], true,
+				geoTxtApi, jsonParser);
+	}
+
+	public static List<String[]> parseLine(String line, String[] writingRows,TokenizerFactory<CoreLabel> tokenizerFactory,
+			LexicalizedParser lp,JSONParser jsonParser) throws IllegalArgumentException, URISyntaxException, IOException, ParseException {
+		ArrayList<String[]> result = new ArrayList<String[]>();
+		
+		// tokenize and produce parse tree
+		Tokenizer<CoreLabel> tok = tokenizerFactory
+				.getTokenizer(new StringReader(line));
+		// Tokenizer<CoreLabel> tok =
+		// tokenizerFactory.getTokenizer(new
+		// StringReader("Hotel Jardin d'Eiffel is close to Eiffel tower"));
+		// Tokenizer<CoreLabel> tok =
+		// tokenizerFactory.getTokenizer(new
+		// StringReader("Situated in Paris's Trocadero neighborhood, this hotel is close to Wine Museum, Eiffel Tower, and Arc de Triomphe"));
+
+		List<CoreLabel> rawWords2 = tok.tokenize();
+
+		Tree parse = lp.apply(rawWords2);
+
+		// produce & print the parse tree
+
+		// System.out.println("sentence: >"+line+"<");
+
+		// TODO: parse should become a column in output csv
+		// System.out.println("Parse results:\n"+parse.pennString());
+
+		writingRows[8] = parse.pennString();
+
+		// test tregex by checking for a pattern
+		String s = "S < NP=np1 <+(VP) (ADVP < (RB < close) < (PP < (TO < to) <+(NP) (NP=np2 !< CC !> (NP !< CC))))";
+
+		writingRows[7] = s;
+
+		// String s = "S < NP=np1 < (VP < (ADJP < (JJ < close)))";
+
+		// TODO: pattern should become a column in the output csv
+
+		TregexPattern p = TregexPattern.compile(s);
+		TregexMatcher m = p.matcher(parse);
+
+		while (m.find()) {
+			System.out.println("sentence: >" + line + "<");
+
+			// TODO: matching parse tree should become a column in
+			// the output csv
+			// System.out.println("Parse results match:\n"+m.getMatch().pennString());
+
+			writingRows[9] = m.getMatch().pennString();
+
+			// System.out.println("geotxt: ");
+			// String geocodeResults =
+			// geoTxtApi.geoCodeToGeoJson(line, "stanfordh", false,
+			// 0, false, true);
+			// System.out.println(geocodeResults);
+			// System.out.println("stanford extraction: ");
+			// String sr =
+			// StanfordHierarchyAnalyzer.st.tagAlltoGeoJson(line,
+			// false, 0, false, true);
+			// System.out.println(sr);
+			// System.out.println("gate extraction: ");
+			// sr = GateHierarchyAnalyzer.gate.tagAlltoGeoJson(line,
+			// false, 0, false, true);
+			// System.out.println(sr);
+			Tree t = m.getNode("np1");
+			System.out.println("np1:\n" + Sentence.listToString(t.yield()));
+
+			// np1
+			writingRows[10] = Sentence.listToString(t.yield());
+
+
+			t = m.getNode("np2");
+			System.out.println("np2:\n"
+					+ Sentence.listToString(t.yield()));
+
+			writingRows[13] = Sentence.listToString(t.yield());
+			
+			// System.out.println("match:\n")
+			m.getMatch().pennPrint();
+			// System.out.println("\n");
+			result.add(writingRows.clone());
+		}
+		return result;
+	}
+
+	public static void addParseResults(String filename, String outputCSVName)
 			throws FileNotFoundException, IOException {
-		Config config = new Config();
 
 		LexicalizedParser lp = LexicalizedParser
 				.loadModel("englishPCFG.ser.gz");
 		TokenizerFactory<CoreLabel> tokenizerFactory = PTBTokenizer.factory(
 				new CoreLabelTokenFactory(), "");
-		GeoTxtApi geoTxtApi = new GeoTxtApi(config.getGate_home(),
-				config.getStanford_ner());
 
+		JSONParser jsonParser = new JSONParser();
+
+		try {
+			CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(
+					outputCSVName), ','));
+
+			CSVReader r = new CSVReader(new InputStreamReader(
+					new FileInputStream(filename), "UTF-8"));
+
+			int cc = 0;
+
+			String[] rows = r.readNext();
+			String[] writingRows = new String[16];
+
+			for (int i = 0; i < rows.length; i++) {
+				writingRows[i] = rows[i];
+			}
+
+			String line = rows[6];
+			while (line != null) {
+
+				if (!line.replaceFirst("^[\\x00-\\x200\\xA0]+", "")
+						.replaceFirst("[\\x00-\\x20\\xA0]+$", "").isEmpty()) {
+					System.out.println("here");
+					// line =
+					// "Timhotel Paris Boulogne is located in Boulogne-Billancourt, close to Pierre de Coubertin Stadium, Eiffel Tower, and Stade de Roland Garros.";
+					List<String[]> result = parseLine(line,writingRows,tokenizerFactory,lp,jsonParser);
+
+					for (String[] nr : result) {
+						System.out.println("writing");
+						writer.writeNext(nr);
+					}
+					
+				}
+				cc++;
+				log.info(Integer.toString(cc) + " processed.");
+
+				rows = r.readNext();
+
+				try {
+					int rowLength = rows.length;
+				} catch (Exception e) {
+					log.info("Could not read line.");
+					r.close();
+					writer.close();
+				}
+
+				writingRows = new String[16];
+				for (int i = 0; i < rows.length; i++) {
+					writingRows[i] = rows[i];
+				}
+
+
+
+				line = rows[6];
+			}
+			log.info(Integer.toString(cc));
+			r.close();
+			writer.close();
+
+		} catch (Exception e) {
+			log.info("file operation failed, could not read file");
+			e.printStackTrace();
+		}
+	}
+
+	public static void addGeocodeResults(String filename, String outputCSVName)
+			throws FileNotFoundException, IOException {
+
+		Config config = new Config();
+
+		GeoTxtApi geoTxtApi = new GeoTxtApi(config.getGate_home(),
+				config.getStanford_ner());	
 		JSONParser jsonParser = new JSONParser();
 
 		try {
@@ -207,121 +384,15 @@ public class Test {
 						.replaceFirst("[\\x00-\\x20\\xA0]+$", "").isEmpty()) {
 					// line =
 					// "Timhotel Paris Boulogne is located in Boulogne-Billancourt, close to Pierre de Coubertin Stadium, Eiffel Tower, and Stade de Roland Garros.";
+					geocodeLine(line,writingRows,jsonParser,geoTxtApi);
 
-					// tokenize and produce parse tree
-					Tokenizer<CoreLabel> tok = tokenizerFactory
-							.getTokenizer(new StringReader(line));
-					// Tokenizer<CoreLabel> tok =
-					// tokenizerFactory.getTokenizer(new
-					// StringReader("Hotel Jardin d'Eiffel is close to Eiffel tower"));
-					// Tokenizer<CoreLabel> tok =
-					// tokenizerFactory.getTokenizer(new
-					// StringReader("Situated in Paris's Trocadero neighborhood, this hotel is close to Wine Museum, Eiffel Tower, and Arc de Triomphe"));
-
-					List<CoreLabel> rawWords2 = tok.tokenize();
-
-					Tree parse = lp.apply(rawWords2);
-
-					// produce & print the parse tree
-
-					// System.out.println("sentence: >"+line+"<");
-
-					// TODO: parse should become a column in output csv
-					// System.out.println("Parse results:\n"+parse.pennString());
-
-					writingRows[8] = parse.pennString();
-
-					// test tregex by checking for a pattern
-					String s = "S < NP=np1 <+(VP) (ADVP < (RB < close) < (PP < (TO < to) <+(NP) (NP=np2 !< CC)))";
-
-					writingRows[7] = s;
-
-					// String s = "S < NP=np1 < (VP < (ADJP < (JJ < close)))";
-
-					// TODO: pattern should become a column in the output csv
-
-					TregexPattern p = TregexPattern.compile(s);
-					TregexMatcher m = p.matcher(parse);
-
-					while (m.find()) {
-						// System.out.println("sentence: >" + line + "<");
-
-						// TODO: matching parse tree should become a column in
-						// the output csv
-						// System.out.println("Parse results match:\n"+m.getMatch().pennString());
-
-						writingRows[9] = m.getMatch().pennString();
-
-						// System.out.println("geotxt: ");
-						// String geocodeResults =
-						// geoTxtApi.geoCodeToGeoJson(line, "stanfordh", false,
-						// 0, false, true);
-						// System.out.println(geocodeResults);
-						// System.out.println("stanford extraction: ");
-						// String sr =
-						// StanfordHierarchyAnalyzer.st.tagAlltoGeoJson(line,
-						// false, 0, false, true);
-						// System.out.println(sr);
-						// System.out.println("gate extraction: ");
-						// sr = GateHierarchyAnalyzer.gate.tagAlltoGeoJson(line,
-						// false, 0, false, true);
-						// System.out.println(sr);
-						Tree t = m.getNode("np1");
-						// System.out.println("np1:\n"
-						// + Sentence.listToString(t.yield()));
-
-						// np1
-						writingRows[10] = Sentence.listToString(t.yield());
-
-						writingRows[11] = GeoLocation.getGeoInfo(
-								Sentence.listToString(t.yield()), geoTxtApi,
-								jsonParser, false);
-
-						writingRows[12] = GeoLocation.getCandidates(
-								Sentence.listToString(t.yield()), true,
-								geoTxtApi, jsonParser);
-
-						// System.out.println("<p>toponym: "
-						// + GeoLocation.getGeoInfo(
-						// Sentence.listToString(t.yield()),
-						// geoTxtApi, jsonParser, true) + "</p>\n");
-
-						t = m.getNode("np2");
-						// System.out.println("np2:\n"
-						// + Sentence.listToString(t.yield()));
-
-						writingRows[13] = Sentence.listToString(t.yield());
-
-						writingRows[14] = GeoLocation.getGeoInfo(
-								Sentence.listToString(t.yield()), geoTxtApi,
-								jsonParser, false);
-
-						writingRows[15] = GeoLocation.getCandidates(
-								Sentence.listToString(t.yield()), true,
-								geoTxtApi, jsonParser);
-
-						// System.out.println("<p>toponym: "
-						// + GeoLocation.getGeoInfo(
-						// Sentence.listToString(t.yield()),
-						// geoTxtApi, jsonParser, true) + "</p>\n");
-
-						// System.out.println("match:\n")
-						m.getMatch().pennPrint();
-						// System.out.println("\n");
-
-						writer.writeNext(writingRows);
-
-						for (int i = 9; i < writingRows.length; i++) {
-							writingRows[i] = null;
-						}
-
-					}
+					writer.writeNext(writingRows);
 				}
 				cc++;
 				log.info(Integer.toString(cc) + " processed.");
 
 				rows = r.readNext();
-				
+
 				try {
 					int rowLength = rows.length;
 				} catch (Exception e) {
@@ -330,12 +401,9 @@ public class Test {
 					writer.close();
 				}
 
+				writingRows = new String[16];
 				for (int i = 0; i < rows.length; i++) {
 					writingRows[i] = rows[i];
-				}
-
-				for (int i = rows.length; i < writingRows.length; i++) {
-					writingRows[i] = null;
 				}
 
 				line = rows[6];
@@ -356,14 +424,28 @@ public class Test {
 																						 new NPKeywordFilter(keywords),
 																						 //new DifferentAdmin2Filter(),
 																						 new DistanceFilter(100) });
-		*/
+		 */
+
+		/*addDistanceColumn("phrases_20150716WithNPs.csv","output_with_distance_filtered100km.csv", new Filter[] { new ToponymsFoundFilter(), 
+				new NPKeywordFilter(keywords),
+				new DistanceFilter(100) } );
+		 */
 		
-		addDistanceColumn("phrases_20150716WithNPs.csv","output_with_distance_filtered100km.csv", new Filter[] { new ToponymsFoundFilter(), 
-																						 new NPKeywordFilter(keywords),
-																						 new DistanceFilter(100) } );
 		
-		//parseFile("phrases_20150716.csv", "output.csv");
-		// parseFile("phrases_cities_20150708.txt","output.csv");
+		addParseResults("phrases_20150716.csv","parseResults20150716.csv");
+		//addGeocodeResults("parseResults20150716.csv","geocodingResults20150716.csv");
+		
+		/*Config config = new Config();
+
+		LexicalizedParser lp = LexicalizedParser
+				.loadModel("englishPCFG.ser.gz");
+		TokenizerFactory<CoreLabel> tokenizerFactory = PTBTokenizer.factory(
+				new CoreLabelTokenFactory(), "");
+		GeoTxtApi geoTxtApi = new GeoTxtApi(config.getGate_home(),
+				config.getStanford_ner());	
+		JSONParser jsonParser = new JSONParser();
+		processLine("chicago athletic association is located in chicago, close to pritzker pavilion, millennium park, and art institute of chicago",new String[20],tokenizerFactory,lp,jsonParser,geoTxtApi);
+*/
 	}
 
 }

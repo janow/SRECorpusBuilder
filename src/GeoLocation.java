@@ -27,10 +27,11 @@ public class GeoLocation {
 			ParseException {
 
 		String response = "";
-
+System.out.println(placeName);
+		
 		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
 				false, 0, true, true);
-
+		System.out.println(geoCodedString);
 		Object geoCodedObj = parser.parse(geoCodedString);
 
 		JSONObject geoCodedJson = (JSONObject) geoCodedObj;
