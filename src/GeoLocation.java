@@ -111,7 +111,7 @@ System.out.println(placeName);
 		String response = "";
 
 		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
-				includeAlternates, 0, true, true);
+				includeAlternates, 100, true, true);
 
 		return geoCodedString;
 

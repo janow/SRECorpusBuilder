@@ -179,7 +179,7 @@ public class Test {
 
 		writingRows[11] = GeoLocation.getGeoInfo(
 				writingRows[10], geoTxtApi,
-				jsonParser, false);
+				jsonParser, true);
 
 		writingRows[12] = GeoLocation.getCandidates(
 				writingRows[10], true,
@@ -187,7 +187,7 @@ public class Test {
 
 		writingRows[14] = GeoLocation.getGeoInfo(
 				writingRows[13], geoTxtApi,
-				jsonParser, false);
+				jsonParser, true);
 
 		writingRows[15] = GeoLocation.getCandidates(
 				writingRows[13], true,
@@ -308,7 +308,7 @@ public class Test {
 
 				if (!line.replaceFirst("^[\\x00-\\x200\\xA0]+", "")
 						.replaceFirst("[\\x00-\\x20\\xA0]+$", "").isEmpty()) {
-					System.out.println("here");
+					//System.out.println("here");
 					// line =
 					// "Timhotel Paris Boulogne is located in Boulogne-Billancourt, close to Pierre de Coubertin Stadium, Eiffel Tower, and Stade de Roland Garros.";
 					List<String[]> result = parseLine(line,writingRows,tokenizerFactory,lp,jsonParser);
@@ -432,8 +432,8 @@ public class Test {
 		 */
 		
 		
-		addParseResults("phrases_20150716.csv","parseResults20150716.csv");
-		//addGeocodeResults("parseResults20150716.csv","geocodingResults20150716.csv");
+		//addParseResults("phrases_20150716.csv","parseResults20150716.csv");
+		addGeocodeResults("parseResults20150716.csv","geocodingResults20150716.csv");
 		
 		/*Config config = new Config();
 
