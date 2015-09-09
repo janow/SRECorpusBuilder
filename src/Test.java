@@ -420,11 +420,11 @@ public class Test {
 
 	public final static void main(String[] args) throws Exception {
 		String[] keywords = { "the hotel", "we", "he", "she", "they", "you", "our hotel", "this hotel" };
-		/*produceHTMLfromCSV("phrases_20150716WithNPs.csv", "output2.html", new Filter[] { new ToponymsFoundFilter(), 
+		produceHTMLfromCSV("geocodingResults20150716.csv", "output2.html", new Filter[] { new ToponymsFoundFilter(), new EditDistanceFilter(3, false), 
 																						 new NPKeywordFilter(keywords),
 																						 //new DifferentAdmin2Filter(),
 																						 new DistanceFilter(100) });
-		 */
+		 
 
 		/*addDistanceColumn("phrases_20150716WithNPs.csv","output_with_distance_filtered100km.csv", new Filter[] { new ToponymsFoundFilter(), 
 				new NPKeywordFilter(keywords),
@@ -433,7 +433,7 @@ public class Test {
 		
 		
 		//addParseResults("phrases_20150716.csv","parseResults20150716.csv");
-		addGeocodeResults("parseResults20150716.csv","geocodingResults20150716.csv");
+		//addGeocodeResults("parseResults20150716.csv","geocodingResults20150716.csv");
 		
 		/*Config config = new Config();
 
