@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -48,8 +50,8 @@ public class Utility {
 				(Double) id2.get(0), (Double) id2.get(1));
 	}
 
-	public static double computeEditDistanceFromJSON(String np, String gJson,
-			JSONParser jsonParser) {
+	public static boolean computeEditDistanceFromJSON(String np, String gJson,
+			double threshold, boolean considerAlternates, JSONParser jsonParser) {
 
 		Object geoCodedObj = null;
 
@@ -65,10 +67,23 @@ public class Utility {
 				.get("features")).get(0);
 
 		JSONObject properties = (JSONObject) feature.get("properties");
+		
 
 		String toponym = (String) properties.get("toponym");
+		
+		ArrayList<Double> distance = new ArrayList<Double>();
+				
+		if (considerAlternates == true){
+			JSONArray alternateNamesJsonArray = (JSONArray) feature.get("alternateNames");
 
-		return minEditDistance(np, toponym);
+		}
+
+		//TODO alternate names and the toponym are given the same weight. 
+		
+		return (minEditDistance(np, toponym) / Math.max(np.length(),
+				toponym.length())) > threshold;
+				
+				
 	}
 
 	public static double minEditDistance(String word1, String word2) {

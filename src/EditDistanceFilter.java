@@ -30,9 +30,10 @@ public class EditDistanceFilter implements Filter {
 //				.computeEditDistanceFromJSON(row[13], row[15], jsonParser) / row[13]
 //				.length()) < editDistThreshold));
 		
-		return (((Utility.computeEditDistanceFromJSON(row[10], row[12],
-				jsonParser)) < editDistThreshold) && ((Utility
-				.computeEditDistanceFromJSON(row[13], row[15], jsonParser)) < editDistThreshold));
+		return (((Utility.computeEditDistanceFromJSON(row[10], row[12], editDistThreshold, true,
+				
+				jsonParser))) && ((Utility
+				.computeEditDistanceFromJSON(row[13], row[15],editDistThreshold,true, jsonParser))));
 
 	}
 }
