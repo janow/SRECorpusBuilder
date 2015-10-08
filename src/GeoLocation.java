@@ -29,7 +29,7 @@ public class GeoLocation {
 		String response = "";
 System.out.println(placeName);
 		
-		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "sre",
 				false, 0, true, true);
 		System.out.println(geoCodedString);
 		Object geoCodedObj = parser.parse(geoCodedString);
@@ -110,7 +110,7 @@ System.out.println(placeName);
 
 		String response = "";
 
-		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "none",
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "sre",
 				includeAlternates, 100, true, true);
 
 		return geoCodedString;
