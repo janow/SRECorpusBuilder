@@ -1,4 +1,8 @@
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -6,6 +10,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class Utility {
+
+	public static Logger log = Logger.getLogger("Utility");
+
 	public static double computeDist(double lat1, double lng1, double lat2,
 			double lng2) {
 		double earthRadius = 6371; // kilometers
@@ -19,6 +26,130 @@ public class Utility {
 		double dist = earthRadius * c;
 
 		return dist;
+	}
+
+	public static String[] getMinimumDistancePair(String[] line,
+			JSONParser jsonParser) {
+
+		String[] writingRows = new String[18];
+
+		for (int i = 0; i < line.length; i++) {
+			writingRows[i] = line[i];
+		}
+
+		Object geoCodedObj1 = null;
+		Object geoCodedObj2 = null;
+		if (!(line[11].equalsIgnoreCase("No toponym found") || line[14]
+				.equalsIgnoreCase("No toponym found"))) {
+			try {
+				System.out.println(line[12]);
+				geoCodedObj1 = jsonParser.parse(line[12]);
+				geoCodedObj2 = jsonParser.parse(line[15]);
+			} catch (ParseException e) {
+				System.out.println("Parse exception ....");
+				e.printStackTrace();
+				System.exit(1);
+			}
+
+			JSONObject feature1 = (JSONObject) ((JSONArray) ((JSONObject) geoCodedObj1)
+					.get("features")).get(0);
+			JSONObject feature2 = (JSONObject) ((JSONArray) ((JSONObject) geoCodedObj2)
+					.get("features")).get(0);
+
+			JSONObject alternatesFeature1 = (JSONObject) ((JSONObject) feature1
+					.get("properties")).get("alternates");
+
+			JSONObject alternatesFeature2 = (JSONObject) ((JSONObject) feature2
+					.get("properties")).get("alternates");
+
+			JSONArray alternates1 = new JSONArray();
+			JSONArray alternates2 = new JSONArray();
+
+			boolean noAlternates[] = new boolean[2];
+
+			if (alternatesFeature1 == null) {
+				alternates1.add((JSONObject) geoCodedObj1);
+				noAlternates[0] = true;
+			} else {
+				alternates1 = (JSONArray) alternatesFeature1.get("features");
+
+			}
+			if (alternatesFeature2 == null) {
+				alternates2.add((JSONObject) geoCodedObj2);
+				noAlternates[1] = true;
+			} else {
+				alternates2 = (JSONArray) alternatesFeature2.get("features");
+			}
+
+			Object[] alternates1ObjArray = alternates1.toArray();
+			Object[] alternates2ObjArray = alternates2.toArray();
+
+			// double [] distances = new
+			// double[alternates1ObjArray.length*alternates2ObjArray.length];
+
+			ArrayList<Double> distances = new ArrayList<Double>();
+
+			JSONObject pickedFeature1 = new JSONObject();
+			JSONObject pickedFeature2 = new JSONObject();
+			
+
+			for (int a1 = 0; a1 < alternates1ObjArray.length; a1++) {
+
+				JSONObject al1 = (JSONObject) alternates1ObjArray[a1];
+				JSONObject prop1 = (JSONObject) al1.get("properties");
+				Long geoNameId1 = (Long) prop1.get("geoNameId");
+				JSONObject geom1 = (JSONObject) al1.get("geometry");
+				JSONArray coo1 = (JSONArray) geom1.get("coordinates");
+
+				for (int a2 = 0; a2 < alternates2ObjArray.length; a2++) {
+
+					JSONObject al2 = (JSONObject) alternates2ObjArray[a2];
+					JSONObject prop2 = (JSONObject) al2.get("properties");
+					Long geoNameId2 = (Long) prop2.get("geoNameId");
+					JSONObject geom2 = (JSONObject) al2.get("geometry");
+					JSONArray coo2 = (JSONArray) geom2.get("coordinates");
+
+					// implicit double (from computeDist) to Double
+					Double distance = Utility.computeDist((Double) coo1.get(0),
+							(Double) coo1.get(1), (Double) coo2.get(0),
+							(Double) coo2.get(1));
+
+					Double minDist;
+
+					if (!distances.isEmpty()) {
+						minDist = Collections.min(distances);
+					} else {
+						minDist = distance;
+					}
+
+					if (distance < minDist || distances.size() == 1) {
+						pickedFeature1 = al1;
+						pickedFeature2 = al2;
+					}
+
+					// implicit double to Double
+					distances.add(distance);
+
+				}
+			}
+
+			JSONObject pickedFeature1Json = new JSONObject();
+			pickedFeature1Json.put("type", "FeatureCollection");
+			JSONArray features1Array = new JSONArray();
+			features1Array.add(pickedFeature1);
+			pickedFeature1Json.put("features", features1Array);
+			writingRows[16] = pickedFeature1Json.toJSONString();
+
+			JSONObject pickedFeature2Json = new JSONObject();
+			pickedFeature2Json.put("type", "FeatureCollection");
+			JSONArray features2Array = new JSONArray();
+			features2Array.add(pickedFeature2);
+			pickedFeature2Json.put("features", features2Array);
+			writingRows[17] = pickedFeature1Json.toJSONString();
+
+		}
+
+		return writingRows;
 	}
 
 	public static double computeDistanceFromJSON(String json1, String json2,
@@ -67,23 +198,22 @@ public class Utility {
 				.get("features")).get(0);
 
 		JSONObject properties = (JSONObject) feature.get("properties");
-		
 
 		String toponym = (String) properties.get("toponym");
-		
+
 		ArrayList<Double> distance = new ArrayList<Double>();
-				
-		if (considerAlternates == true){
-			JSONArray alternateNamesJsonArray = (JSONArray) feature.get("alternateNames");
+
+		if (considerAlternates == true) {
+			JSONArray alternateNamesJsonArray = (JSONArray) feature
+					.get("alternateNames");
 
 		}
 
-		//TODO alternate names and the toponym are given the same weight. 
-		
+		// TODO alternate names and the toponym are given the same weight.
+
 		return (minEditDistance(np, toponym) / Math.max(np.length(),
 				toponym.length())) > threshold;
-				
-				
+
 	}
 
 	public static double minEditDistance(String word1, String word2) {

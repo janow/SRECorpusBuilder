@@ -27,10 +27,10 @@ public class GeoLocation {
 			ParseException {
 
 		String response = "";
-System.out.println(placeName);
-		
-		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "sre",
-				false, 0, true, true);
+		System.out.println(placeName);
+
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName,
+				"landmarkGeocoder", false, 0, true, true);
 		System.out.println(geoCodedString);
 		Object geoCodedObj = parser.parse(geoCodedString);
 
@@ -95,9 +95,9 @@ System.out.println(placeName);
 					+ geoNameId
 					+ "</a>";
 		} else {
-			
+
 			response += " - " + fCode;
-			response += " "+  geoNameId.toString();
+			response += " " + geoNameId.toString();
 		}
 
 		return response;
@@ -110,8 +110,8 @@ System.out.println(placeName);
 
 		String response = "";
 
-		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName, "sre",
-				includeAlternates, 100, true, true);
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName,
+				"landmarkGeocoder", includeAlternates, 100, true, true);
 
 		return geoCodedString;
 
