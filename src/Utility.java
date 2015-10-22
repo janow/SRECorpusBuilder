@@ -1,4 +1,6 @@
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -29,7 +31,8 @@ public class Utility {
 	}
 
 	public static String[] getMinimumDistancePair(String[] line,
-			JSONParser jsonParser) {
+			JSONParser jsonParser) throws IllegalArgumentException,
+			URISyntaxException, IOException, ParseException {
 
 		String[] writingRows = new String[18];
 
@@ -39,12 +42,11 @@ public class Utility {
 
 		Object geoCodedObj1 = null;
 		Object geoCodedObj2 = null;
-		if (!(line[11].equalsIgnoreCase("No toponym found") || line[14]
+		if (!(line[11].equalsIgnoreCase("No toponym found") || line[15]
 				.equalsIgnoreCase("No toponym found"))) {
 			try {
-				System.out.println(line[12]);
 				geoCodedObj1 = jsonParser.parse(line[12]);
-				geoCodedObj2 = jsonParser.parse(line[15]);
+				geoCodedObj2 = jsonParser.parse(line[16]);
 			} catch (ParseException e) {
 				System.out.println("Parse exception ....");
 				e.printStackTrace();
@@ -91,7 +93,6 @@ public class Utility {
 
 			JSONObject pickedFeature1 = new JSONObject();
 			JSONObject pickedFeature2 = new JSONObject();
-			
 
 			for (int a1 = 0; a1 < alternates1ObjArray.length; a1++) {
 
@@ -122,7 +123,7 @@ public class Utility {
 						minDist = distance;
 					}
 
-					if (distance < minDist || distances.size() == 1) {
+					if (distance < minDist || distances.size() == 0) {
 						pickedFeature1 = al1;
 						pickedFeature2 = al2;
 					}
@@ -138,14 +139,20 @@ public class Utility {
 			JSONArray features1Array = new JSONArray();
 			features1Array.add(pickedFeature1);
 			pickedFeature1Json.put("features", features1Array);
-			writingRows[16] = pickedFeature1Json.toJSONString();
+			writingRows[13] = pickedFeature1Json.toJSONString();
 
 			JSONObject pickedFeature2Json = new JSONObject();
 			pickedFeature2Json.put("type", "FeatureCollection");
 			JSONArray features2Array = new JSONArray();
 			features2Array.add(pickedFeature2);
 			pickedFeature2Json.put("features", features2Array);
-			writingRows[17] = pickedFeature1Json.toJSONString();
+			writingRows[17] = pickedFeature2Json.toJSONString();
+
+			writingRows[11] = GeoLocation.reWriteGeoInfo(writingRows[10],
+					writingRows[13], jsonParser, true);
+
+			writingRows[15] = GeoLocation.reWriteGeoInfo(writingRows[14],
+					writingRows[17], jsonParser, true);
 
 		}
 
@@ -171,11 +178,11 @@ public class Utility {
 		JSONObject feature2 = (JSONObject) ((JSONArray) ((JSONObject) geoCodedObj2)
 				.get("features")).get(0);
 
-		JSONObject properties1 = (JSONObject) feature1.get("geometry");
-		JSONObject properties2 = (JSONObject) feature2.get("geometry");
+		JSONObject geometry1 = (JSONObject) feature1.get("geometry");
+		JSONObject geometry2 = (JSONObject) feature2.get("geometry");
 
-		JSONArray id1 = (JSONArray) properties1.get("coordinates");
-		JSONArray id2 = (JSONArray) properties2.get("coordinates");
+		JSONArray id1 = (JSONArray) geometry1.get("coordinates");
+		JSONArray id2 = (JSONArray) geometry2.get("coordinates");
 
 		return Utility.computeDist((Double) id1.get(0), (Double) id1.get(1),
 				(Double) id2.get(0), (Double) id2.get(1));
@@ -256,4 +263,7 @@ public class Utility {
 		return dp[len1][len2];
 	}
 
+	public static void main(String[] args) {
+
+	}
 }

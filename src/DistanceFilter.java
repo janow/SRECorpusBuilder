@@ -15,8 +15,8 @@ public class DistanceFilter implements Filter {
 	
 	@Override
 	public boolean doFilter(String[] row) {
-		if (row[11].equals("No toponym found") || row[14].equals("No toponym found")) return true;
+		if (row[11].equals("No toponym found") || row[15].equals("No toponym found")) return true;
 		
-		return Utility.computeDistanceFromJSON(row[12], row[15], jsonParser) > distThreshold;
+		return Utility.computeDistanceFromJSON(row[13], row[17], jsonParser) > distThreshold;
 	}
 }

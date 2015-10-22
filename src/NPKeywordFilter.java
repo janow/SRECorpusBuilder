@@ -9,6 +9,6 @@ public class NPKeywordFilter implements Filter {
 	}
 	
 	public boolean doFilter(String[] row) {
-		return Arrays.asList(nps).contains(row[10].toLowerCase()) || Arrays.asList(nps).contains(row[11].toLowerCase());
+		return Arrays.asList(nps).contains(row[10].toLowerCase()) || Arrays.asList(nps).contains(row[14].toLowerCase());
 	}
 }

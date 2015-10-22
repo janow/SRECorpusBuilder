@@ -119,23 +119,23 @@ public class Test {
 							+ "\"/><label for=\"item-gc1-\""
 							+ c
 							+ "\">GeoJSON np1</label><ul><p><pre style=\"white-space: pre-wrap\">"
-							+ row[12] + "</pre></p></ul></li></ul></div>\n");
+							+ row[13] + "</pre></p></ul></li></ul></div>\n");
 
-					bw.write("<p style=\"color: #000099\">np2: " + row[13]
+					bw.write("<p style=\"color: #000099\">np2: " + row[14]
 							+ "</p>\n");
 
-					bw.write("<p>toponym: " + row[14] + "</p>\n");
+					bw.write("<p>toponym: " + row[15] + "</p>\n");
 
 					bw.write("<div class=\"css-treeview\"><ul><li><input type=\"checkbox\" id=\"item-gc2-\""
 							+ c
 							+ "\"/><label for=\"item-gc2-\""
 							+ c
 							+ "\">GeoJSON np2</label><ul><p><pre style=\"white-space: pre-wrap\">"
-							+ row[15] + "</pre></p></ul></li></ul></div>\n");
+							+ row[17] + "</pre></p></ul></li></ul></div>\n");
 
 					JSONParser jsonParser = new JSONParser();
 					bw.write("<p>distance: "
-							+ Utility.computeDistanceFromJSON(row[12], row[15],
+							+ Utility.computeDistanceFromJSON(row[13], row[17],
 									jsonParser) + " km</p>");
 
 				}
@@ -186,17 +186,17 @@ public class Test {
 					continue;
 
 				cc++;
-				String[] writingRow = new String[17];
-				for (int i = 0; i < 16; i++) {
+				String[] writingRow = new String[19];
+				for (int i = 0; i < rows.length; i++) {
 					writingRow[i] = rows[i];
 				}
 				if (!rows[11].equals("No toponym found")
-						&& !rows[14].equals("No toponym found"))
-					writingRow[16] = ""
+						&& !rows[15].equals("No toponym found"))
+					writingRow[18] = ""
 							+ Utility.computeDistanceFromJSON(rows[12],
 									rows[15], jsonParser);
 				else
-					writingRow[16] = "";
+					writingRow[18] = "";
 
 				writer.writeNext(writingRow);
 
@@ -216,18 +216,27 @@ public class Test {
 			JSONParser jsonParser, GeoTxtApi geoTxtApi)
 			throws IllegalArgumentException, URISyntaxException, IOException,
 			ParseException {
+		
+	  writingRows[12] =  geoTxtApi.geoCodeToGeoJson(writingRows[10],
+				"landmarkGeocoder", true, 100, true, true);
 
-		writingRows[11] = GeoLocation.getGeoInfo(writingRows[10], geoTxtApi,
+		writingRows[11] = GeoLocation.reWriteGeoInfo(writingRows[10], writingRows[12],
 				jsonParser, true);
 
-		writingRows[12] = GeoLocation.getCandidates(writingRows[10], true,
-				geoTxtApi, jsonParser);
+//		writingRows[12] = GeoLocation.getCandidates(writingRows[10], true,
+//				geoTxtApi, jsonParser);
+		
+		
+//		writingRows[16] = GeoLocation.getCandidates(writingRows[14], true,
+//				geoTxtApi, jsonParser);
+		
+		writingRows[16] = geoTxtApi.geoCodeToGeoJson(writingRows[14],
+				"landmarkGeocoder", true, 100, true, true);
 
-		writingRows[14] = GeoLocation.getGeoInfo(writingRows[13], geoTxtApi,
+		writingRows[15] = GeoLocation.reWriteGeoInfo (writingRows[14], writingRows[16],
 				jsonParser, true);
 
-		writingRows[15] = GeoLocation.getCandidates(writingRows[13], true,
-				geoTxtApi, jsonParser);
+		
 	}
 
 	public static List<String[]> parseLine(String line, String[] writingRows,
@@ -303,7 +312,7 @@ public class Test {
 			t = m.getNode("np2");
 			System.out.println("np2:\n" + Sentence.listToString(t.yield()));
 
-			writingRows[13] = Sentence.listToString(t.yield());
+			writingRows[14] = Sentence.listToString(t.yield());
 
 			// System.out.println("match:\n")
 			m.getMatch().pennPrint();
@@ -333,7 +342,7 @@ public class Test {
 			int cc = 0;
 
 			String[] rows = r.readNext();
-			String[] writingRows = new String[16];
+			String[] writingRows = new String[17];
 
 			for (int i = 0; i < rows.length; i++) {
 				writingRows[i] = rows[i];
@@ -369,7 +378,7 @@ public class Test {
 					writer.close();
 				}
 
-				writingRows = new String[16];
+				writingRows = new String[17];
 				for (int i = 0; i < rows.length; i++) {
 					writingRows[i] = rows[i];
 				}
@@ -406,7 +415,7 @@ public class Test {
 			int cc = 0;
 
 			String[] rows = r.readNext();
-			String[] writingRows = new String[16];
+			String[] writingRows = new String[18];
 
 			for (int i = 0; i < rows.length; i++) {
 				writingRows[i] = rows[i];
@@ -436,7 +445,7 @@ public class Test {
 					writer.close();
 				}
 
-				writingRows = new String[16];
+				writingRows = new String[18];
 				for (int i = 0; i < rows.length; i++) {
 					writingRows[i] = rows[i];
 				}
@@ -499,11 +508,12 @@ public class Test {
 		 String[] keywords = { "the hotel", "we", "he", "she", "they", "you",
 		 "our hotel", "this hotel" };
 		 produceHTMLfromCSV("closestPicked.csv", "output2.html",
-		 new Filter[] { new ToponymsFoundFilter(), new EditDistanceFilter(3,
-		 false),
-		 new NPKeywordFilter(keywords),
+		 new Filter[] { new ToponymsFoundFilter(),
+		 new EditDistanceFilter(3, false),
+		 new NPKeywordFilter(keywords)
 		 //new DifferentAdmin2Filter(),
-		 new DistanceFilter(100) });
+		 //new DistanceFilter(100) 
+		 });
 
 		/*
 		 * addDistanceColumn("phrases_20150716WithNPs.csv",

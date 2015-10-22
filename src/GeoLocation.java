@@ -21,17 +21,16 @@ public class GeoLocation {
 	 * @throws ParseException
 	 */
 
-	public static String getGeoInfo(String placeName, GeoTxtApi geoTxtApi,
+	public static String reWriteGeoInfo(String placeName, String geoJson,
 			JSONParser parser, boolean formatOutput)
 			throws IllegalArgumentException, URISyntaxException, IOException,
 			ParseException {
 
 		String response = "";
-		System.out.println(placeName);
+		
 
-		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName,
-				"landmarkGeocoder", false, 0, true, true);
-		System.out.println(geoCodedString);
+		String geoCodedString = geoJson;
+				
 		Object geoCodedObj = parser.parse(geoCodedString);
 
 		JSONObject geoCodedJson = (JSONObject) geoCodedObj;
@@ -103,6 +102,90 @@ public class GeoLocation {
 		return response;
 	}
 
+	
+//TODO: remove this function. Not in use
+	public static String getGeoInfo(String placeName, GeoTxtApi geoTxtApi,
+			JSONParser parser, boolean formatOutput)
+			throws IllegalArgumentException, URISyntaxException, IOException,
+			ParseException {
+
+		String response = "";
+
+		String geoCodedString = geoTxtApi.geoCodeToGeoJson(placeName,
+				"landmarkGeocoder", false, 0, true, true);
+
+		Object geoCodedObj = parser.parse(geoCodedString);
+
+		JSONObject geoCodedJson = (JSONObject) geoCodedObj;
+
+		JSONArray features = (JSONArray) geoCodedJson.get("features");
+
+		JSONObject feature = (JSONObject) features.get(0);
+
+		JSONObject properties = (JSONObject) feature.get("properties");
+
+		Long geoNameId = (Long) properties.get("geoNameId");
+
+		String fCode = (String) properties.get("featureCode");
+
+		if (geoNameId == null) {
+			return "No toponym found";
+		}
+
+		String toponym = (String) properties.get("toponym");
+
+		if (formatOutput) {
+			response = "<b>Toponym</b>: " + toponym;
+		} else {
+			response = toponym;
+		}
+
+		JSONObject hierarchyFc = (JSONObject) properties.get("hierarchy");
+		JSONArray hierarchyArray = (JSONArray) hierarchyFc.get("features");
+
+		Iterator<JSONObject> iterator = hierarchyArray.iterator();
+
+		String hierarchy = "";
+
+		while (iterator.hasNext()) {
+
+			JSONObject hFeature = (JSONObject) iterator.next();
+
+			JSONObject hProperties = (JSONObject) hFeature.get("properties");
+
+			String hToponym = (String) hProperties.get("toponym");
+
+			hierarchy += hToponym + ", ";
+
+		}
+
+		if (hierarchy.length() > 0) {
+			hierarchy = hierarchy.substring(0, hierarchy.length() - 2);
+		}
+
+		response += ", " + hierarchy;
+
+		if (formatOutput) {
+
+			response += " <b> FeatureCode: </b> " + fCode;
+
+			response += "  <a target=\"_blank\" href=\"http://www.geonames.org/"
+					+ geoNameId.toString()
+					+ "\">See on GeoNames</a> or <a target=\"_blank\" href=\"http://api.geonames.org/get?geonameId="
+					+ geoNameId.toString()
+					+ "&username=demo&style=full\">Check ID "
+					+ geoNameId
+					+ "</a>";
+		} else {
+
+			response += " - " + fCode;
+			response += " " + geoNameId.toString();
+		}
+
+		return response;
+	}
+
+//TODO remove this function. Not in use
 	public static String getCandidates(String placeName,
 			boolean includeAlternates, GeoTxtApi geoTxtApi, JSONParser parser)
 			throws IllegalArgumentException, URISyntaxException, IOException,
