@@ -394,7 +394,44 @@ public class Test {
 			e.printStackTrace();
 		}
 	}
+/*	
+	public static void addGeometryInformation(String filename, String outputCSVName)
+			throws FileNotFoundException, IOException {
+	
+		try {
 
+			CSVWriter writer = new CSVWriter(new BufferedWriter(new FileWriter(
+					outputCSVName), ','));
+
+			CSVReader r = new CSVReader(new InputStreamReader(
+					new FileInputStream(filename), "UTF-8"));
+
+			int cc = 0;
+
+
+		
+			String[] nextLine;
+			String [] writingRows;
+			
+			while ((nextLine = r.readNext()) != null) {
+
+				if (!(nextLine[11].equalsIgnoreCase("No toponym found"))) {
+					OSMNominatimInterface.OSMResult res = OSMNominatimInterface.getGeometry(nextLine[11], lat, lon) 
+				}
+				
+			
+			
+			log.info(Integer.toString(cc));
+			r.close();
+			writer.close();
+
+		} catch (Exception e) {
+			log.info("file operation failed, could not read file");
+			e.printStackTrace();
+		}
+	}
+			*/
+			
 	public static void addGeocodeResults(String filename, String outputCSVName)
 			throws FileNotFoundException, IOException {
 
