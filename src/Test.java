@@ -515,6 +515,9 @@ public class Test {
 		 //new DistanceFilter(100) 
 		 });
 
+		/* 
+		 
+		 
 		/*
 		 * addDistanceColumn("phrases_20150716WithNPs.csv",
 		 * "output_with_distance_filtered100km.csv", new Filter[] { new
